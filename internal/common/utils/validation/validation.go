@@ -22,6 +22,7 @@ func RegisterCustomValidation(v *validator.Validate) error {
 	if err := v.RegisterValidation("isBool", validateIsBool); err != nil {
 		return fmt.Errorf("failed to register boolean validation: %s", err)
 	}
+
 	if err := v.RegisterValidation("noSpace", validateNoSpace); err != nil {
 		return fmt.Errorf("failed to register username has space: %s", err)
 	}
@@ -42,7 +43,6 @@ func CustomError(e validator.FieldError) string {
 
 func ValidateFile(v *validator.Validate, fileHeader *multipart.FileHeader) error {
 
-	// fmt.Println(fileHeader)
 	if err := v.Var(fileHeader, "fileformat"); err != nil {
 		return fmt.Errorf("file format must be JPG or JPEG")
 	}
@@ -107,6 +107,36 @@ func UuidValidation(uuid string) error {
 
 	if !regex.MatchString(uuid) {
 		return fmt.Errorf("uuid is not valid")
+	}
+
+	return nil
+}
+
+func EmailValidation(email string) error {
+	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	regex, err := regexp.Compile(pattern)
+	if err != nil {
+		return fmt.Errorf("failed to compile pattern %v", err)
+	}
+
+	if !regex.MatchString(email) {
+		return fmt.Errorf("email is not valid")
+	}
+
+	return nil
+}
+
+func PhoneValidation(phone string) error {
+	if !strings.HasPrefix(phone, "+") {
+		return fmt.Errorf("email is not valid")
+	}
+
+	pattern := `^\+\d+$`
+	regex := regexp.MustCompile(pattern)
+
+	if !regex.MatchString(phone) {
+		return fmt.Errorf("email is not valid")
 	}
 
 	return nil
