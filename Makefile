@@ -1,0 +1,42 @@
+# build app
+.PHONY: build
+build:
+	@go build -o ./build/app ./cmd/main.go
+
+# build app alpine
+.PHONY: build-alpine
+build-alpine:
+	@go mod tidy && \
+	GOOS=linux GOARCH=amd64 go build -o ./build/app ./cmd/main.go
+
+.PHONY: migrate-up
+migrate-up:
+	migrate -source file://./db/migrations \
+	-database postgres://postgres:root@localhost:5432/ \
+	segokuning_social_app up
+
+.PHONY: migrate-down
+migrate-up:
+	migrate -source file://./db/migrations \
+	-database postgres://postgres:root@localhost:5432/ \
+	segokuning_social_app down
+
+# make startProm
+.PHONY: start-prom
+start-prom:
+	docker run \
+	--rm \
+	--network="host" \
+	-p 9090:9090 \
+	--name=prometheus \
+	-v $(shell pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+	prom/prometheus
+
+# make startGrafana
+# for first timers, the username & password is both `admin`
+.PHONY: start-grafana
+start-grafana:
+	docker volume create grafana-storage
+	docker volume inspect grafana-storage
+	docker run -p 3000:3000 --name=grafana grafana/grafana-oss || docker start grafana
+	
