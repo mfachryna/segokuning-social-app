@@ -23,6 +23,10 @@ func (ur *UserRepository) FindById(ctx context.Context, userId string) error {
 	return nil
 }
 
+func (ur *UserRepository) FindByField(ctx context.Context, userId string) error {
+	return nil
+}
+
 func (ur *UserRepository) Insert(ctx context.Context, data entity.User) error {
 	return nil
 }
