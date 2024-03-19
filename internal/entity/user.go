@@ -10,3 +10,10 @@ type User struct {
 	Password  string
 	CreatedAt time.Time
 }
+
+type UserLoginData struct {
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	Name        string `json:"name"`
+	AccessToken string `json:"accessToken"`
+}
