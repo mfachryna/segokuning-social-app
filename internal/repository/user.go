@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
@@ -23,6 +24,31 @@ func (ur *UserRepository) Get(ctx context.Context, data entity.User) error {
 
 func (ur *UserRepository) FindById(ctx context.Context, userId string) error {
 	return nil
+}
+
+func (ur *UserRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
+	res := &entity.User{}
+	sql := `SELECT id, name, email, COALESCE(phone, ''), password FROM users WHERE email = $1`
+
+	err := ur.db.QueryRow(ctx, sql, email).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
+	if err != nil {
+		fmt.Println("AWAW", err)
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (ur *UserRepository) FindByPhone(ctx context.Context, phone string) (*entity.User, error) {
+	res := &entity.User{}
+	sql := `SELECT id, name, COALESCE(email, ''), phone, password FROM users WHERE phone = $1`
+
+	err := ur.db.QueryRow(ctx, sql, phone).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (ur *UserRepository) FindByField(ctx context.Context, userId string) error {
