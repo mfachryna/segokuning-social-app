@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/friend"
 )
 
 type FriendRepository struct {
@@ -17,18 +16,6 @@ func NewFriendRepo(db *pgxpool.Pool) *FriendRepository {
 	return &FriendRepository{
 		db: db,
 	}
-}
-
-func (ur *FriendRepository) Get(ctx context.Context, userId string) (dto.Friend, error) {
-	return dto.Friend{}, nil
-}
-
-func (ur *FriendRepository) FindById(ctx context.Context, userId, FriendId string) error {
-	return nil
-}
-
-func (ur *FriendRepository) FindByField(ctx context.Context, FriendId string) error {
-	return nil
 }
 
 func (ur *FriendRepository) FindByRelation(ctx context.Context, userId, friendId string) (int, error) {
@@ -54,12 +41,21 @@ func (ur *FriendRepository) Insert(ctx context.Context, userId, friendId string)
 		return err
 	}
 
+	userSql := `UPDATE users SET friend_count = friend_count + 1 WHERE (id = $1 or id = $2)`
+	if _, err := ur.db.Exec(ctx, userSql, userId, friendId); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (ur *FriendRepository) Delete(ctx context.Context, userId, friendId string) error {
 	sql := `DELETE from friends where (user_id = $2 and friend_id = $1) or (user_id = $1 and friend_id = $2)`
 	if _, err := ur.db.Exec(ctx, sql, userId, friendId); err != nil {
+		return err
+	}
+	userSql := `UPDATE users SET friend_count = friend_count - 1 WHERE (id = $1 or id = $2)`
+	if _, err := ur.db.Exec(ctx, userSql, userId, friendId); err != nil {
 		return err
 	}
 

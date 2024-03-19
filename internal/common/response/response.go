@@ -3,13 +3,9 @@ package response
 import (
 	"encoding/json"
 	"net/http"
-)
 
-type Meta struct {
-	Limit  int64 `json:"limit"`
-	Offset int64 `json:"offset"`
-	Total  int64 `json:"total"`
-}
+	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/meta"
+)
 
 type Response struct {
 	HttpStatus int         `json:"-"`
@@ -21,7 +17,7 @@ type ResponseWithMeta struct {
 	HttpStatus int         `json:"-"`
 	Message    string      `json:"message"`
 	Data       interface{} `json:"data"`
-	Meta       Meta        `json:"meta"`
+	Meta       dto.Meta    `json:"meta"`
 }
 
 var (

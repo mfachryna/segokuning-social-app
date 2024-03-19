@@ -77,5 +77,4 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 		HttpStatus: http.StatusOK,
 		Message:    "Delete friend success",
 	}).GenerateResponse(w)
-	return
 }

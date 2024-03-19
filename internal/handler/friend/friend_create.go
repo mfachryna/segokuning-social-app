@@ -103,5 +103,4 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 		HttpStatus: http.StatusOK,
 		Message:    "Add friend success",
 	}).GenerateResponse(w)
-	return
 }

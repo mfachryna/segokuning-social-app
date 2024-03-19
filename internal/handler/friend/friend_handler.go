@@ -25,6 +25,7 @@ func NewFriendHandler(r chi.Router, ur interfaces.UserRepository, fr interfaces.
 
 	r.Route("/friend", func(r chi.Router) {
 		r.Use(jwt.JwtMiddleware)
+		r.Get("/", fh.GetFriend)
 		r.Post("/", fh.CreateFriend)
 		r.Delete("/", fh.DeleteFriend)
 	})
