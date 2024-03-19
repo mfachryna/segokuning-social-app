@@ -60,7 +60,7 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if credType == "phone" {
-		if err := validation.EmailValidation(data.CredentialValue); err != nil {
+		if err := validation.PhoneValidation(data.CredentialValue); err != nil {
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    err.Error(),
