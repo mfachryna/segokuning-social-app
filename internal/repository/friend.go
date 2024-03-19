@@ -23,7 +23,7 @@ func (ur *FriendRepository) Get(ctx context.Context, userId string) (dto.Friend,
 	return dto.Friend{}, nil
 }
 
-func (ur *FriendRepository) FindById(ctx context.Context, userId string, FriendId string) error {
+func (ur *FriendRepository) FindById(ctx context.Context, userId, FriendId string) error {
 	return nil
 }
 
@@ -31,7 +31,7 @@ func (ur *FriendRepository) FindByField(ctx context.Context, FriendId string) er
 	return nil
 }
 
-func (ur *FriendRepository) FindByRelation(ctx context.Context, userId string, friendId string) (int, error) {
+func (ur *FriendRepository) FindByRelation(ctx context.Context, userId, friendId string) (int, error) {
 	var count int
 	sql := `SELECT count(*) password FROM friends WHERE user_id = $1 and friend_id = $2`
 	err := ur.db.QueryRow(ctx, sql, userId, friendId).Scan(&count)
@@ -43,7 +43,7 @@ func (ur *FriendRepository) FindByRelation(ctx context.Context, userId string, f
 	return count, nil
 }
 
-func (ur *FriendRepository) Insert(ctx context.Context, userId string, friendId string) error {
+func (ur *FriendRepository) Insert(ctx context.Context, userId, friendId string) error {
 	var sql string
 
 	var datetime = time.Now()
@@ -57,6 +57,11 @@ func (ur *FriendRepository) Insert(ctx context.Context, userId string, friendId 
 	return nil
 }
 
-func (ur *FriendRepository) Delete(ctx context.Context, FriendId string) error {
+func (ur *FriendRepository) Delete(ctx context.Context, userId, friendId string) error {
+	sql := `DELETE from friends where (user_id = $2 and friend_id = $1) or (user_id = $1 and friend_id = $2)`
+	if _, err := ur.db.Exec(ctx, sql, userId, friendId); err != nil {
+		return err
+	}
+
 	return nil
 }

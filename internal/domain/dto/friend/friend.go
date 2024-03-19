@@ -6,6 +6,6 @@ type Friend struct {
 	Data []entity.User `json:"data"`
 }
 
-type FriendCreate struct {
+type FriendData struct {
 	UserId string `json:"userId" validate:"required"`
 }

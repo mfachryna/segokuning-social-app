@@ -13,6 +13,6 @@ type (
 		FindById(context.Context, string, string) error
 		FindByRelation(context.Context, string, string) (int, error)
 		Insert(context.Context, string, string) error
-		Delete(context.Context, string) error
+		Delete(context.Context, string, string) error
 	}
 )
