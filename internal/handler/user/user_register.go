@@ -41,14 +41,6 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if data.CredentialValue == "" {
-		(&response.Response{
-			HttpStatus: http.StatusBadRequest,
-			Message:    "required fields are missing or invalid",
-		}).GenerateResponse(w)
-		return
-	}
-
 	ctx := r.Context()
 	uuid := uuid.NewString()
 	credType := data.CredentialType
