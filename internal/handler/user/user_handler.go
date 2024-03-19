@@ -21,4 +21,5 @@ func NewUserHandler(r chi.Router, ur interfaces.UserRepository, val *validator.V
 	}
 
 	r.Post("/user/register", uh.Register)
+	r.Post("/user/login", uh.Login)
 }
