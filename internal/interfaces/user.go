@@ -10,7 +10,7 @@ import (
 type (
 	UserRepository interface {
 		Get(context.Context, entity.User) error
-		FindById(context.Context, string) error
+		FindById(context.Context, string) (*entity.User, error)
 		FindByEmail(context.Context, string) (*entity.User, error)
 		FindByPhone(context.Context, string) (*entity.User, error)
 		Insert(context.Context, entity.User, string) error

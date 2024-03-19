@@ -15,6 +15,12 @@ type Response struct {
 	HttpStatus int         `json:"-"`
 	Message    string      `json:"message"`
 	Data       interface{} `json:"data"`
+}
+
+type ResponseWithMeta struct {
+	HttpStatus int         `json:"-"`
+	Message    string      `json:"message"`
+	Data       interface{} `json:"data"`
 	Meta       Meta        `json:"meta"`
 }
 
@@ -23,6 +29,11 @@ var (
 )
 
 func (res *Response) GenerateResponse(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.HttpStatus)
+	json.NewEncoder(w).Encode(res)
+}
+func (res *ResponseWithMeta) GenerateResponseMeta(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.HttpStatus)
 	json.NewEncoder(w).Encode(res)

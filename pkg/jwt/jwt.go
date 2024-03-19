@@ -1,11 +1,15 @@
 package jwt
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 )
 
 type Claim struct {
@@ -37,4 +41,100 @@ func SignedToken(claim Claim) (string, error) {
 		return "", fmt.Errorf("failed to sign token: %w", err)
 	}
 	return signedToken, nil
+}
+
+func JwtMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			fmt.Println("token not found")
+			(&response.Response{
+				HttpStatus: http.StatusUnauthorized,
+				Message:    "token not found",
+			}).GenerateResponse(w)
+			return
+		}
+
+		tokenString := string(authHeader)
+		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				fmt.Printf("unexpected signing method: %v \n", t.Header["alg"])
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		if err != nil {
+			validationErr, ok := err.(*jwt.ValidationError)
+			if ok {
+				if validationErr.Errors == jwt.ValidationErrorExpired {
+					fmt.Println(err.Error())
+					(&response.Response{
+						HttpStatus: http.StatusUnauthorized,
+						Message:    "given security scheme is valid, but the lifetime has been expired or revoked.",
+					}).GenerateResponse(w)
+					return
+				}
+			}
+			fmt.Println(err.Error())
+			(&response.Response{
+				HttpStatus: http.StatusUnauthorized,
+				Message:    "token is invalid.",
+			}).GenerateResponse(w)
+			return
+		}
+
+		if !token.Valid {
+			fmt.Println("invalid token claims")
+			(&response.Response{
+				HttpStatus: http.StatusUnauthorized,
+				Message:    "invalid token claims",
+			}).GenerateResponse(w)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user_id", token.Claims.(jwt.MapClaims)["user_id"])
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+func OptionalJwtMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		tokenString := string(authHeader)
+		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		if err != nil {
+			validationErr, ok := err.(*jwt.ValidationError)
+			if ok {
+				if validationErr.Errors == jwt.ValidationErrorExpired {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if !token.Valid {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user_id", token.Claims.(jwt.MapClaims)["user_id"])
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
 }

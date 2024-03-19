@@ -13,7 +13,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
-	handler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
+	friendHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/friend"
+	userHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/db"
 )
@@ -23,8 +24,6 @@ func Run(cfg *config.Configuration) {
 
 	pgx := db.NewPsqlDB(cfg)
 
-	ur := repository.NewUserRepo(pgx)
-
 	validate = validator.New()
 	if err := validation.RegisterCustomValidation(validate); err != nil {
 		log.Fatalf("error register custom validation")
@@ -32,8 +31,11 @@ func Run(cfg *config.Configuration) {
 
 	r := chi.NewRouter()
 
+	ur := repository.NewUserRepo(pgx)
+	fr := repository.NewFriendRepo(pgx)
 	r.Route("/v1", func(r chi.Router) {
-		handler.NewUserHandler(r, ur, validate, *cfg)
+		userHandler.NewUserHandler(r, ur, validate, *cfg)
+		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg)
 	})
 
 	s := &http.Server{
@@ -41,7 +43,7 @@ func Run(cfg *config.Configuration) {
 		Handler: r,
 	}
 	go func() {
-		fmt.Println("Listen and Serve at port 8080")
+		fmt.Println("Listen and Serve at port 8000")
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatalf("error in ListenAndServe: %s", err)
 		}

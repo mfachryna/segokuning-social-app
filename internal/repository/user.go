@@ -22,8 +22,17 @@ func (ur *UserRepository) Get(ctx context.Context, data entity.User) error {
 	return nil
 }
 
-func (ur *UserRepository) FindById(ctx context.Context, userId string) error {
-	return nil
+func (ur *UserRepository) FindById(ctx context.Context, userId string) (*entity.User, error) {
+	res := &entity.User{}
+	sql := `SELECT id, name, email, COALESCE(phone, ''), password FROM users WHERE id = $1`
+
+	err := ur.db.QueryRow(ctx, sql, userId).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
+	if err != nil {
+		fmt.Println("AWAW", err)
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (ur *UserRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
