@@ -129,14 +129,14 @@ func EmailValidation(email string) error {
 
 func PhoneValidation(phone string) error {
 	if !strings.HasPrefix(phone, "+") {
-		return fmt.Errorf("email is not valid")
+		return fmt.Errorf("phone is not valid")
 	}
 
 	pattern := `^\+\d+$`
 	regex := regexp.MustCompile(pattern)
 
 	if !regex.MatchString(phone) {
-		return fmt.Errorf("email is not valid")
+		return fmt.Errorf("phone is not valid")
 	}
 
 	return nil
