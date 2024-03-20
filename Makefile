@@ -11,15 +11,13 @@ build-alpine:
 
 .PHONY: migrate-up
 migrate-up:
-	migrate -source file://./db/migrations \
-	-database postgres://postgres:root@localhost:5432/ \
-	segokuning_social_app up
+	migrate -path db/migrations -verbose \
+	-database "postgres://postgres:root@localhost:5432/segokuning_social_app" up
 
 .PHONY: migrate-down
-migrate-up:
-	migrate -source file://./db/migrations \
-	-database postgres://postgres:root@localhost:5432/ \
-	segokuning_social_app down
+migrate-down:
+	migrate -path db/migrations -verbose \
+	-database "postgres://postgres:root@localhost:5432/segokuning_social_app" down
 
 # make startProm
 .PHONY: start-prom
