@@ -83,6 +83,14 @@ func (uh *UserHandler) LinkPhone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if resUser.Phone != "" {
+		(&response.Response{
+			HttpStatus: http.StatusBadRequest,
+			Message:    "cannot change phone number if you already have one",
+		}).GenerateResponse(w)
+		return
+	}
+
 	resUser.Phone = data.Phone
 
 	if err := uh.ur.Update(ctx, *resUser); err != nil {
