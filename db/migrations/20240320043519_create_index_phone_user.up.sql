@@ -1,1 +1,1 @@
-CREATE INDEX users_email ON users(phone);
+CREATE INDEX IF NOT EXISTS users_phone ON users(phone);

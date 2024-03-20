@@ -1,1 +1,1 @@
-DROP INDEX users_email ON users;
+DROP INDEX users_email;

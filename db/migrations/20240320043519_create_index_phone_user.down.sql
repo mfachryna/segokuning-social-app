@@ -1,1 +1,1 @@
-DROP INDEX users_phone ON users;
+DROP INDEX users_phone;
