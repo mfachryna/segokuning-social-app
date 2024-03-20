@@ -1,3 +1,8 @@
+# run app
+.PHONY: run
+run:
+	@go run cmd/main.go
+
 # build app
 .PHONY: build
 build:
@@ -9,11 +14,13 @@ build-alpine:
 	@go mod tidy && \
 	GOOS=linux GOARCH=amd64 go build -o ./build/app ./cmd/main.go
 
+# migrate up
 .PHONY: migrate-up
 migrate-up:
 	migrate -path db/migrations -verbose \
 	-database "postgres://postgres:root@localhost:5432/segokuning_social_app" up
 
+# migrate down
 .PHONY: migrate-down
 migrate-down:
 	migrate -path db/migrations -verbose \
