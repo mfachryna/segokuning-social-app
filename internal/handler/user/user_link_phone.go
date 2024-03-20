@@ -9,7 +9,6 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
-	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
 )
 
 func (uh *UserHandler) LinkPhone(w http.ResponseWriter, r *http.Request) {
@@ -47,10 +46,8 @@ func (uh *UserHandler) LinkPhone(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	userId = ctx.Value("user_id").(string)
-	user := entity.User{}
-	user.Phone = data.Phone
 
-	resultPhone, err := uh.ur.FindByPhone(ctx, user.Phone)
+	resultPhone, err := uh.ur.FindByPhone(ctx, data.Phone)
 	if err != nil {
 		if err != pgx.ErrNoRows {
 			(&response.Response{
