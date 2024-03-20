@@ -25,6 +25,11 @@ func NewUserHandler(r chi.Router, ur interfaces.UserRepository, val *validator.V
 		r.Post("/register", uh.Register)
 		r.Post("/login", uh.Login)
 
+		r.Route("/", func(r chi.Router) {
+			r.Use(jwt.JwtMiddleware)
+			r.Patch("/", uh.Update)
+		})
+
 		r.Route("/link", func(r chi.Router) {
 			r.Use(jwt.JwtMiddleware)
 			r.Post("/phone", uh.LinkPhone)
