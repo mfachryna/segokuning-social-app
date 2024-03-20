@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
@@ -108,13 +107,13 @@ func (ur *UserRepository) Insert(ctx context.Context, data entity.User, credType
 
 	switch credType {
 	case "phone":
-		sql = `INSERT INTO users (id,phone,name,password,friend_count,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`
-		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Phone, data.Name, data.Password, 0, data.CreatedAt, data.CreatedAt); err != nil {
+		sql = `INSERT INTO users (id,phone,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,$6)`
+		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Phone, data.Name, data.Password, 0, data.CreatedAt); err != nil {
 			return err
 		}
 	case "email":
-		sql = `INSERT INTO users (id,email,name,password,friend_count,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`
-		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Email, data.Name, data.Password, 0, data.CreatedAt, data.CreatedAt); err != nil {
+		sql = `INSERT INTO users (id,email,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,$6)`
+		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Email, data.Name, data.Password, 0, data.CreatedAt); err != nil {
 			return err
 		}
 	}
@@ -127,9 +126,9 @@ func (ur *UserRepository) Delete(ctx context.Context, userId string) error {
 }
 
 func (ur *UserRepository) Update(ctx context.Context, data entity.User) error {
-	sql := `UPDATE users SET name = $1, email = $2, phone = $3, password = $4, image_url = $5, friend_count = $6, updated_at = $7 WHERE id = $8`
+	sql := `UPDATE users SET name = $1, email = $2, phone = $3, password = $4, image_url = $5, friend_count = $6 WHERE id = $8`
 
-	_, err := ur.db.Exec(ctx, sql, data.Name, data.Email, data.Phone, data.Password, data.ImageUrl, data.FriendCount, time.Now(), data.ID)
+	_, err := ur.db.Exec(ctx, sql, data.Name, data.Email, data.Phone, data.Password, data.ImageUrl, data.FriendCount, data.ID)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
+	commentHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/comment"
 	friendHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/friend"
+	postHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/post"
 	userHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/db"
@@ -33,9 +35,13 @@ func Run(cfg *config.Configuration) {
 
 	ur := repository.NewUserRepo(pgx)
 	fr := repository.NewFriendRepo(pgx)
+	cr := repository.NewCommentRepo(pgx)
+	pr := repository.NewPostRepo(pgx)
 	r.Route("/v1", func(r chi.Router) {
 		userHandler.NewUserHandler(r, ur, validate, *cfg)
 		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg)
+		postHandler.NewPostHandler(r, ur, pr, validate, *cfg)
+		commentHandler.NewCommentHandler(r, fr, cr, pr, validate, *cfg)
 	})
 
 	s := &http.Server{
