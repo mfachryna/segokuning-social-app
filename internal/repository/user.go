@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
@@ -25,7 +26,7 @@ func (ur *UserRepository) Get(ctx context.Context, data entity.User) error {
 
 func (ur *UserRepository) FindById(ctx context.Context, userId string) (*entity.User, error) {
 	res := &entity.User{}
-	sql := `SELECT id, name, email, COALESCE(phone, ''), password FROM users WHERE id = $1`
+	sql := `SELECT id, name, COALESCE(email, ''), COALESCE(phone, ''), password FROM users WHERE id = $1`
 
 	err := ur.db.QueryRow(ctx, sql, userId).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
 	if err != nil {
@@ -126,6 +127,12 @@ func (ur *UserRepository) Delete(ctx context.Context, userId string) error {
 }
 
 func (ur *UserRepository) Update(ctx context.Context, data entity.User) error {
+	sql := `UPDATE users SET name = $1, email = $2, phone = $3, password = $4, image_url = $5, friend_count = $6, updated_at = $7 WHERE id = $8`
+
+	_, err := ur.db.Exec(ctx, sql, data.Name, data.Email, data.Phone, data.Password, data.ImageUrl, data.FriendCount, time.Now(), data.ID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
