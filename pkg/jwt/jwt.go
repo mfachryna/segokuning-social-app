@@ -25,7 +25,7 @@ type JWTToken struct {
 }
 
 func SignedToken(claim Claim) (string, error) {
-	exp := time.Now().Add(2 * time.Minute)
+	exp := time.Now().Add(8 * time.Hour)
 	expAt := exp.Unix()
 	iat := time.Now().Unix()
 
@@ -99,6 +99,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 func OptionalJwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
