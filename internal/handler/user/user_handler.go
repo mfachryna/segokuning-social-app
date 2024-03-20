@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	interfaces "github.com/shafaalafghany/segokuning-social-app/internal/interfaces"
+	"github.com/shafaalafghany/segokuning-social-app/pkg/jwt"
 )
 
 type UserHandler struct {
@@ -23,5 +24,10 @@ func NewUserHandler(r chi.Router, ur interfaces.UserRepository, val *validator.V
 	r.Route("/user", func(r chi.Router) {
 		r.Post("/register", uh.Register)
 		r.Post("/login", uh.Login)
+
+		r.Route("/link", func(r chi.Router) {
+			r.Use(jwt.JwtMiddleware)
+			r.Post("/phone", uh.LinkPhone)
+		})
 	})
 }
