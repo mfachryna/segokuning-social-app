@@ -50,7 +50,7 @@ func NewConfig() *Configuration {
 
 	config := Configuration{
 		Server: ServerConfig{
-			Port: ":8000",
+			Port: ":8080",
 		},
 		Postgres: PostgresConfig{
 			PostgresqlHost:     os.Getenv("DB_HOST"),

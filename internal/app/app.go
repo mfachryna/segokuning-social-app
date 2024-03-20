@@ -43,7 +43,7 @@ func Run(cfg *config.Configuration) {
 		Handler: r,
 	}
 	go func() {
-		fmt.Println("Listen and Serve at port 8000")
+		fmt.Println("Listen and Serve at port 8080")
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatalf("error in ListenAndServe: %s", err)
 		}
