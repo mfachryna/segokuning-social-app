@@ -15,6 +15,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	commentHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/comment"
 	friendHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/friend"
+	imageHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/image"
 	postHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/post"
 	userHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
@@ -42,6 +43,7 @@ func Run(cfg *config.Configuration) {
 		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg)
 		postHandler.NewPostHandler(r, ur, pr, validate, *cfg)
 		commentHandler.NewCommentHandler(r, fr, cr, pr, validate, *cfg)
+		imageHandler.NewImageHandler(r, *validate, *cfg)
 	})
 
 	s := &http.Server{
