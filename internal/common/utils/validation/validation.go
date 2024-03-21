@@ -141,3 +141,11 @@ func PhoneValidation(phone string) error {
 
 	return nil
 }
+
+func ValidateImageFileType(fileHeader *multipart.FileHeader) error {
+	ext := strings.ToLower(fileHeader.Filename[strings.LastIndex(fileHeader.Filename, ".")+1:])
+	if !(ext == "jpg" || ext == "jpeg") {
+		return fmt.Errorf("file format must be JPG or JPEG")
+	}
+	return nil
+}
