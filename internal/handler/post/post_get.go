@@ -46,10 +46,10 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	// userId = ctx.Value("user_id").(string)
+	userId := ctx.Value("user_id").(string)
 
 	*filter.Offset = *filter.Limit * (*filter.Offset)
-	data, count, err := uh.pr.GetPostWithFilter(ctx, filter)
+	data, count, err := uh.pr.GetPostWithFilter(ctx, filter, userId)
 	if err != nil {
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,

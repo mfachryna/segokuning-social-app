@@ -68,8 +68,6 @@ func (uh *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	fmt.Println(userId, post.UserId)
-
 	count, err := uh.fr.FindByRelation(ctx, userId, post.UserId)
 	if err != nil {
 		(&response.Response{

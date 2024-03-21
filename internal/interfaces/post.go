@@ -11,7 +11,7 @@ import (
 type (
 	PostRepository interface {
 		Insert(context.Context, entity.Post, string) error
-		GetPostWithFilter(context.Context, dto.PostFilter) ([]dto.Post, int64, error)
+		GetPostWithFilter(context.Context, dto.PostFilter, string) ([]dto.Post, int64, error)
 		FindById(context.Context, string) (entity.Post, error)
 	}
 )

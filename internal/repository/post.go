@@ -44,11 +44,11 @@ func (pr *PostRepository) FindById(ctx context.Context, postId string) (entity.P
 	return post, nil
 }
 
-func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.PostFilter) ([]dtopost.Post, int64, error) {
+func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.PostFilter, userId string) ([]dtopost.Post, int64, error) {
 
-	where := ""
+	where := fmt.Sprintf("WHERE (friends.friend_id = '%s' or posts.user_id = '%s')", userId, userId)
 	if filter.Search != "" {
-		where += "WHERE posts.content LIKE '%" + filter.Search + "%'"
+		where += " AND posts.content LIKE '%" + filter.Search + "%'"
 	}
 
 	if len(filter.SearchTag) > 0 {
@@ -56,11 +56,7 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 		if err == nil {
 			replacer := strings.NewReplacer("[", "{", "]", "}")
 			stringTag := replacer.Replace(string(jsonTag))
-			if where != "" {
-				where += fmt.Sprintf(" AND posts.tags && '%s'", stringTag)
-			} else {
-				where = fmt.Sprintf("WHERE posts.tags && '%s'", stringTag)
-			}
+			where += fmt.Sprintf(" AND posts.tags && '%s'", stringTag)
 		}
 	}
 
@@ -76,6 +72,7 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 	users.created_at,
 	array(SELECT (comments.comment || ',' || comments.created_at || ',' || users.id || ','  || users.name || ','  || users.image_url || ','  || users.friend_count || ','  || users.created_at) FROM comments JOIN users ON comments.user_id = users.id WHERE posts.id = comments.post_id) as comments
 	FROM posts 
+	LEFT JOIN friends ON posts.user_id = friends.user_id
 	JOIN users ON posts.user_id = users.id
 	%s ORDER BY posts.created_at desc LIMIT %d OFFSET %d`, where, *filter.Limit, *filter.Offset)
 
