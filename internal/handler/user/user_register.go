@@ -80,7 +80,7 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		if count > 0 {
 			(&response.Response{
 				HttpStatus: http.StatusConflict,
-				Message:    "email is already used",
+				Message:    "phone is already used",
 			}).GenerateResponse(w)
 			return
 		}
