@@ -139,6 +139,10 @@ func PhoneValidation(phone string) error {
 		return fmt.Errorf("phone is not valid")
 	}
 
+	if len(phone) < 7 || len(phone) > 13 {
+		return fmt.Errorf("phone is too short or long")
+	}
+
 	return nil
 }
 
