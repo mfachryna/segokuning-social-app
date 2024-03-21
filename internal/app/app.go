@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	commentHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/comment"
@@ -20,6 +21,7 @@ import (
 	userHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/db"
+	"github.com/shafaalafghany/segokuning-social-app/pkg/promotheus"
 )
 
 func Run(cfg *config.Configuration) {
@@ -38,7 +40,10 @@ func Run(cfg *config.Configuration) {
 	fr := repository.NewFriendRepo(pgx)
 	cr := repository.NewCommentRepo(pgx)
 	pr := repository.NewPostRepo(pgx)
+
+	r.Handle("/metrics", promhttp.Handler())
 	r.Route("/v1", func(r chi.Router) {
+		r.Use(promotheus.PrometheusMiddleware)
 		userHandler.NewUserHandler(r, ur, validate, *cfg)
 		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg)
 		postHandler.NewPostHandler(r, ur, pr, validate, *cfg)
