@@ -10,6 +10,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/post"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
+	"go.uber.org/zap"
 )
 
 func (uh *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -17,7 +18,9 @@ func (uh *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		userId string
 		data   dto.PostCreate
 	)
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		uh.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "required fields are missing or invalid",
@@ -28,6 +31,7 @@ func (uh *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
+			uh.log.Error(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -45,7 +49,9 @@ func (uh *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		PostInHtml: data.PostInHtml,
 		Tags:       data.Tags,
 	}
+
 	if err := uh.pr.Insert(ctx, postEntity, userId); err != nil {
+		uh.log.Error("failed to insert data", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
