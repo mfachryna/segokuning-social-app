@@ -36,12 +36,14 @@ func (pr *PostRepository) Insert(ctx context.Context, data entity.Post, userId s
 
 func (pr *PostRepository) FindById(ctx context.Context, postId string) (entity.Post, error) {
 
+	var createdAt time.Time
 	post := entity.Post{}
 	sql := `SELECT id, user_id, content, tags, created_at FROM posts WHERE posts.id = $1`
-	if err := pr.db.QueryRow(ctx, sql, postId).Scan(&post.ID, &post.UserId, &post.PostInHtml, &post.Tags, &post.CreatedAt); err != nil {
+	if err := pr.db.QueryRow(ctx, sql, postId).Scan(&post.ID, &post.UserId, &post.PostInHtml, &post.Tags, &createdAt); err != nil {
 		return post, err
 	}
 
+	post.CreatedAt = createdAt.Format("2006-01-02 15:04:05.999")
 	return post, nil
 }
 
@@ -62,7 +64,7 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 	}
 
 	sql := fmt.Sprintf(`SELECT 
-	posts.id, 
+	distinct(posts.id), 
 	posts.content,
 	posts.tags, 
 	posts.created_at, 
@@ -73,9 +75,11 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 	users.created_at,
 	array(SELECT (comments.comment || ',' || comments.created_at || ',' || users.id || ','  || users.name || ','  || users.image_url || ','  || users.friend_count || ','  || users.created_at) FROM comments JOIN users ON comments.user_id = users.id WHERE posts.id = comments.post_id) as comments
 	FROM posts 
-	LEFT JOIN friends ON posts.user_id = friends.user_id
 	JOIN users ON posts.user_id = users.id
-	%s ORDER BY posts.created_at desc LIMIT %d OFFSET %d`, where, filter.Limit, filter.Offset)
+	LEFT JOIN friends ON posts.user_id = friends.user_id
+	%s 
+	ORDER BY posts.created_at desc 
+	LIMIT %d OFFSET %d`, where, filter.Limit, filter.Offset)
 
 	rows, err := pr.db.Query(ctx, sql)
 	if err != nil {

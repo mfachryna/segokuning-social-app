@@ -15,6 +15,6 @@ type PostData struct {
 type Post struct {
 	ID       string               `json:"postId"`
 	Post     entity.Post          `json:"post"`
-	Comments []dtocomment.Comment `json:"commments"`
+	Comments []dtocomment.Comment `json:"comments"`
 	Creator  entity.User          `json:"creator"`
 }

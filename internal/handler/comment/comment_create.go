@@ -40,7 +40,7 @@ func (uh *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) 
 
 	if err := validation.UuidValidation(data.PostId); err != nil {
 		(&response.Response{
-			HttpStatus: http.StatusBadRequest,
+			HttpStatus: http.StatusNotFound,
 			Message:    err.Error(),
 		}).GenerateResponse(w)
 		return
