@@ -9,6 +9,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
+	"go.uber.org/zap"
 )
 
 func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -18,6 +19,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		uh.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "required fields are missing or invalid",
@@ -26,6 +28,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.UrlValidation(data.ImageUrl); err != nil {
+		uh.log.Error("failed to validate url", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "URL malformed",
@@ -37,6 +40,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
+			uh.log.Error(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -45,20 +49,13 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := validation.UrlValidation(data.ImageUrl); err != nil {
-		(&response.Response{
-			HttpStatus: http.StatusBadRequest,
-			Message:    err.Error(),
-		}).GenerateResponse(w)
-		return
-	}
-
 	ctx := r.Context()
 	userId = ctx.Value("user_id").(string)
 
 	result, err := uh.ur.FindById(ctx, userId)
 	if err != nil {
 		if err == pgx.ErrNoRows {
+			uh.log.Error("user is not found", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusNotFound,
 				Message:    "user not found",
@@ -66,6 +63,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		uh.log.Error("failed to get user", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -77,6 +75,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	result.ImageUrl = data.ImageUrl
 
 	if err := uh.ur.Update(ctx, *result); err != nil {
+		uh.log.Error("failed to update user", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
