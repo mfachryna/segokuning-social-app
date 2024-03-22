@@ -6,6 +6,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	interfaces "github.com/shafaalafghany/segokuning-social-app/internal/interfaces"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/jwt"
+	"go.uber.org/zap"
 )
 
 type CommentHandler struct {
@@ -14,15 +15,25 @@ type CommentHandler struct {
 	pr  interfaces.PostRepository
 	val *validator.Validate
 	cfg config.Configuration
+	log *zap.Logger
 }
 
-func NewCommentHandler(r chi.Router, fr interfaces.FriendRepository, cr interfaces.CommentRepository, pr interfaces.PostRepository, val *validator.Validate, cfg config.Configuration) {
+func NewCommentHandler(
+	r chi.Router,
+	fr interfaces.FriendRepository,
+	cr interfaces.CommentRepository,
+	pr interfaces.PostRepository,
+	val *validator.Validate,
+	cfg config.Configuration,
+	log *zap.Logger,
+) {
 	fh := &CommentHandler{
 		fr:  fr,
 		cr:  cr,
 		pr:  pr,
 		val: val,
 		cfg: cfg,
+		log: log,
 	}
 
 	r.Route("/post/comment", func(r chi.Router) {

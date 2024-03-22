@@ -5,17 +5,20 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/jwt"
+	"go.uber.org/zap"
 )
 
 type ImageHandler struct {
 	val *validator.Validate
 	cfg config.Configuration
+	log *zap.Logger
 }
 
-func NewImageHandler(r chi.Router, val validator.Validate, cfg config.Configuration) {
+func NewImageHandler(r chi.Router, val validator.Validate, cfg config.Configuration, log *zap.Logger) {
 	ih := &ImageHandler{
 		val: &val,
 		cfg: cfg,
+		log: log,
 	}
 
 	r.Route("/image", func(r chi.Router) {

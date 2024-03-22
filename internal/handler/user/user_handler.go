@@ -6,19 +6,28 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	interfaces "github.com/shafaalafghany/segokuning-social-app/internal/interfaces"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/jwt"
+	"go.uber.org/zap"
 )
 
 type UserHandler struct {
 	ur  interfaces.UserRepository
 	val *validator.Validate
 	cfg config.Configuration
+	log *zap.Logger
 }
 
-func NewUserHandler(r chi.Router, ur interfaces.UserRepository, val *validator.Validate, cfg config.Configuration) {
+func NewUserHandler(
+	r chi.Router,
+	ur interfaces.UserRepository,
+	val *validator.Validate,
+	cfg config.Configuration,
+	log *zap.Logger,
+) {
 	uh := &UserHandler{
 		ur:  ur,
 		val: val,
 		cfg: cfg,
+		log: log,
 	}
 
 	r.Route("/user", func(r chi.Router) {

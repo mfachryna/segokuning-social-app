@@ -6,6 +6,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/config"
 	interfaces "github.com/shafaalafghany/segokuning-social-app/internal/interfaces"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/jwt"
+	"go.uber.org/zap"
 )
 
 type FriendHandler struct {
@@ -13,14 +14,23 @@ type FriendHandler struct {
 	fr  interfaces.FriendRepository
 	val *validator.Validate
 	cfg config.Configuration
+	log *zap.Logger
 }
 
-func NewFriendHandler(r chi.Router, ur interfaces.UserRepository, fr interfaces.FriendRepository, val *validator.Validate, cfg config.Configuration) {
+func NewFriendHandler(
+	r chi.Router,
+	ur interfaces.UserRepository,
+	fr interfaces.FriendRepository,
+	val *validator.Validate,
+	cfg config.Configuration,
+	log *zap.Logger,
+) {
 	fh := &FriendHandler{
 		ur:  ur,
 		fr:  fr,
 		val: val,
 		cfg: cfg,
+		log: log,
 	}
 
 	r.Route("/friend", func(r chi.Router) {
