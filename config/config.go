@@ -41,18 +41,18 @@ type S3Config struct {
 }
 
 func NewConfig() *Configuration {
-	appConfig := &AppConfig{
-		Environment: os.Getenv("ENV"),
-		JwtSecret:   os.Getenv("JWT_SECRET"),
-		BcryptSalt:  os.Getenv("BCRYPT_SALT"),
-	}
-
 	additional := ""
 	if os.Getenv("ENV") != "production" {
 		additional = "&sslrootcert=ap-southeast-1-bundle.pem&Timezone=UTC"
 		if godotenv.Load() != nil {
 			fmt.Println("error loading .env file")
 		}
+	}
+
+	appConfig := &AppConfig{
+		Environment: os.Getenv("ENV"),
+		JwtSecret:   os.Getenv("JWT_SECRET"),
+		BcryptSalt:  os.Getenv("BCRYPT_SALT"),
 	}
 
 	config := Configuration{
