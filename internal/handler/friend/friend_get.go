@@ -9,6 +9,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	metadto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/meta"
 	userdto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
+	"go.uber.org/zap"
 )
 
 func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,9 @@ func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
 		userId string
 		filter userdto.UserFilter
 	)
+
 	if err := r.ParseForm(); err != nil {
+		uh.log.Error("failed to parse form", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -25,6 +28,7 @@ func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.ValidateParams(r, filter); err != nil {
+		uh.log.Error("failed to validate params", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -33,6 +37,7 @@ func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := schema.NewDecoder().Decode(&filter, r.Form); err != nil {
+		uh.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -43,6 +48,7 @@ func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(filter); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
+			uh.log.Error(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -60,6 +66,7 @@ func (uh *FriendHandler) GetFriend(w http.ResponseWriter, r *http.Request) {
 	filter.Offset = filter.Limit * filter.Offset
 	data, count, err := uh.ur.GetUserWithFilter(ctx, userId, filter)
 	if err != nil {
+		uh.log.Error("failed to get user with filter", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
