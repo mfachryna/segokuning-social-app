@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
-	neturl "net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -83,10 +82,15 @@ func validateNoSpace(fl validator.FieldLevel) bool {
 }
 
 func UrlValidation(url string) error {
-	_, err := neturl.ParseRequestURI(url)
+	pattern := `^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$`
 
+	regex, err := regexp.Compile(pattern)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to compile pattern %v", err)
+	}
+
+	if !regex.MatchString(url) {
+		return fmt.Errorf("url is not valid")
 	}
 
 	return nil
