@@ -21,6 +21,7 @@ import (
 	userHandler "github.com/shafaalafghany/segokuning-social-app/internal/handler/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/db"
+	"github.com/shafaalafghany/segokuning-social-app/pkg/logger"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/promotheus"
 )
 
@@ -34,6 +35,11 @@ func Run(cfg *config.Configuration) {
 		log.Fatalf("error register custom validation")
 	}
 
+	logger, err := logger.Initialize(*cfg)
+	if err != nil {
+		log.Fatalf("failed to initialize logger: %v", err)
+	}
+
 	r := chi.NewRouter()
 
 	ur := repository.NewUserRepo(pgx)
@@ -44,11 +50,11 @@ func Run(cfg *config.Configuration) {
 	r.Handle("/metrics", promhttp.Handler())
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(promotheus.PrometheusMiddleware)
-		userHandler.NewUserHandler(r, ur, validate, *cfg)
-		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg)
-		postHandler.NewPostHandler(r, ur, pr, validate, *cfg)
-		commentHandler.NewCommentHandler(r, fr, cr, pr, validate, *cfg)
-		imageHandler.NewImageHandler(r, *validate, *cfg)
+		userHandler.NewUserHandler(r, ur, validate, *cfg, logger)
+		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg, logger)
+		postHandler.NewPostHandler(r, ur, pr, validate, *cfg, logger)
+		commentHandler.NewCommentHandler(r, fr, cr, pr, validate, *cfg, logger)
+		imageHandler.NewImageHandler(r, *validate, *cfg, logger)
 	})
 
 	s := &http.Server{
