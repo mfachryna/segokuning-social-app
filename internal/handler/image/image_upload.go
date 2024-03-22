@@ -15,11 +15,13 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
+	"go.uber.org/zap"
 )
 
 func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
+		im.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -30,6 +32,7 @@ func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 	// validate file Mime type
 	if err := validation.ValidateImageFileType(fileHeader); err != nil {
+		im.log.Error("failed to validate image file type", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -39,6 +42,7 @@ func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 	// validate file size
 	if fileHeader.Size > (2 * 1024 * 1024) { // 2 MB
+		im.log.Error("file size exceeds the limit (2MB)")
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "file size exceeds the limit (2MB)",
@@ -48,7 +52,7 @@ func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 	imageUrl, err := im.UploadImageToS3(fileHeader.Filename, file)
 	if err != nil {
-		fmt.Println(err.Error())
+		im.log.Error("failed to upload image to s3", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -81,6 +85,7 @@ func (im *ImageHandler) UploadImageToS3(fileName string, image multipart.File) (
 		),
 	})
 	if err != nil {
+		im.log.Error("failed to create new session aws", zap.Error(err))
 		return "", err
 	}
 
@@ -94,6 +99,7 @@ func (im *ImageHandler) UploadImageToS3(fileName string, image multipart.File) (
 		ACL:    aws.String("public-read"),
 	})
 	if err != nil {
+		im.log.Error("failed to put object", zap.Error(err))
 		return "", err
 	}
 
