@@ -47,7 +47,6 @@ func JwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			fmt.Println("token not found")
 			(&response.Response{
 				HttpStatus: http.StatusUnauthorized,
 				Message:    "token not found",
@@ -69,7 +68,6 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			validationErr, ok := err.(*jwt.ValidationError)
 			if ok {
 				if validationErr.Errors == jwt.ValidationErrorExpired {
-					fmt.Println(err.Error())
 					(&response.Response{
 						HttpStatus: http.StatusUnauthorized,
 						Message:    "given security scheme is valid, but the lifetime has been expired or revoked.",
@@ -77,7 +75,6 @@ func JwtMiddleware(next http.Handler) http.Handler {
 					return
 				}
 			}
-			fmt.Println(err.Error())
 			(&response.Response{
 				HttpStatus: http.StatusUnauthorized,
 				Message:    "token is invalid.",
@@ -86,7 +83,6 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		}
 
 		if !token.Valid {
-			fmt.Println("invalid token claims")
 			(&response.Response{
 				HttpStatus: http.StatusUnauthorized,
 				Message:    "invalid token claims",

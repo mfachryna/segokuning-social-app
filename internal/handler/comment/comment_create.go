@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -93,7 +92,6 @@ func (uh *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := uh.cr.Insert(ctx, commentEntity); err != nil {
-		fmt.Println(err.Error())
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),

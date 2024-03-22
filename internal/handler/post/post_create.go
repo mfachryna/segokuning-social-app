@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -47,7 +46,6 @@ func (uh *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		Tags:       data.Tags,
 	}
 	if err := uh.pr.Insert(ctx, postEntity, userId); err != nil {
-		fmt.Println(err.Error())
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),

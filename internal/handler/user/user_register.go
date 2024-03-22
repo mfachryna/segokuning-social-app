@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -45,9 +44,8 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	uuid := uuid.NewString()
 	credType := data.CredentialType
 	user := entity.User{
-		ID:        uuid,
-		Name:      data.Name,
-		CreatedAt: time.Now(),
+		ID:   uuid,
+		Name: data.Name,
 	}
 
 	tokenString, err := jwt.SignedToken(jwt.Claim{UserId: uuid})

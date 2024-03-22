@@ -24,6 +24,14 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}).GenerateResponse(w)
 		return
 	}
+	if err := validation.UrlValidation(data.ImageUrl); err != nil {
+		(&response.Response{
+			HttpStatus: http.StatusBadRequest,
+			Message:    "URL malformed",
+		}).GenerateResponse(w)
+
+		return
+	}
 
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)

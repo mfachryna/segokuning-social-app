@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
@@ -29,7 +30,6 @@ func (ur *UserRepository) FindById(ctx context.Context, userId string) (*entity.
 
 	err := ur.db.QueryRow(ctx, sql, userId).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -42,7 +42,6 @@ func (ur *UserRepository) FindByEmail(ctx context.Context, email string) (*entit
 
 	err := ur.db.QueryRow(ctx, sql, email).Scan(&res.ID, &res.Name, &res.Email, &res.Phone, &res.Password)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -66,7 +65,7 @@ func (ur *UserRepository) GetUserWithFilter(ctx context.Context, userId string, 
 	if !(filter.SortBy == "") && (filter.SortBy != "createdAt") {
 		sort = "users.friend_count"
 	}
-	order := "asc"
+	order := "desc"
 	if !(filter.OrderBy == "") {
 		order = filter.OrderBy
 	}
@@ -81,7 +80,17 @@ func (ur *UserRepository) GetUserWithFilter(ctx context.Context, userId string, 
 		where += " AND users.name LIKE '%" + filter.Search + "%'"
 	}
 
-	rows, err := ur.db.Query(ctx, fmt.Sprintf("SELECT users.id, users.name, users.image_url, users.friend_count, users.created_at FROM users %s %s ORDER BY %s %s LIMIT %d OFFSET %d", join, where, sort, order, *filter.Limit, *filter.Offset))
+	rows, err := ur.db.Query(ctx,
+		fmt.Sprintf(`SELECT 
+		users.id, 
+		users.name, 
+		users.image_url, 
+		users.friend_count, 
+		users.created_at 
+		FROM users %s %s 
+		ORDER BY %s %s 
+		LIMIT %d 
+		OFFSET %d`, join, where, sort, order, filter.Limit, filter.Offset))
 	if err != nil {
 		return []entity.User{}, 0, err
 	}
@@ -90,10 +99,13 @@ func (ur *UserRepository) GetUserWithFilter(ctx context.Context, userId string, 
 	var count int64 = 0
 	for rows.Next() {
 		var user entity.User
-		err := rows.Scan(&user.ID, &user.Name, &user.ImageUrl, &user.FriendCount, &user.CreatedAt)
+		var createdAt time.Time
+		err := rows.Scan(&user.ID, &user.Name, &user.ImageUrl, &user.FriendCount, &createdAt)
 		if err != nil {
 			return []entity.User{}, 0, err
 		}
+
+		user.CreatedAt = createdAt.Format("2006-01-02 15:04:05.999")
 		data = append(data, user)
 		count += 1
 	}
@@ -107,13 +119,13 @@ func (ur *UserRepository) Insert(ctx context.Context, data entity.User, credType
 
 	switch credType {
 	case "phone":
-		sql = `INSERT INTO users (id,phone,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,$6)`
-		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Phone, data.Name, data.Password, 0, data.CreatedAt); err != nil {
+		sql = `INSERT INTO users (id,phone,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,now())`
+		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Phone, data.Name, data.Password, 0); err != nil {
 			return err
 		}
 	case "email":
-		sql = `INSERT INTO users (id,email,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,$6)`
-		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Email, data.Name, data.Password, 0, data.CreatedAt); err != nil {
+		sql = `INSERT INTO users (id,email,name,password,friend_count,created_at) VALUES ($1,$2,$3,$4,$5,now())`
+		if _, err := ur.db.Exec(ctx, sql, data.ID, data.Email, data.Name, data.Password, 0); err != nil {
 			return err
 		}
 	}

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -23,7 +22,6 @@ func (ur *FriendRepository) FindByRelation(ctx context.Context, userId, friendId
 	sql := `SELECT count(user_id) password FROM friends WHERE user_id = $1 and friend_id = $2`
 	err := ur.db.QueryRow(ctx, sql, userId, friendId).Scan(&count)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 

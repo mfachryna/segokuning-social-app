@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -74,7 +75,7 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 	FROM posts 
 	LEFT JOIN friends ON posts.user_id = friends.user_id
 	JOIN users ON posts.user_id = users.id
-	%s ORDER BY posts.created_at desc LIMIT %d OFFSET %d`, where, *filter.Limit, *filter.Offset)
+	%s ORDER BY posts.created_at desc LIMIT %d OFFSET %d`, where, filter.Limit, filter.Offset)
 
 	rows, err := pr.db.Query(ctx, sql)
 	if err != nil {
@@ -83,6 +84,8 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 
 	data := make([]dtopost.Post, 0)
 	var count int64 = 0
+	var createdAt time.Time
+	var creatorCreatedAt time.Time
 	for rows.Next() {
 		var post entity.Post
 		var creator entity.User
@@ -92,16 +95,19 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 			&post.ID,
 			&post.PostInHtml,
 			&post.Tags,
-			&post.CreatedAt,
+			&createdAt,
 			&creator.ID,
 			&creator.Name,
 			&creator.ImageUrl,
 			&creator.FriendCount,
-			&creator.CreatedAt,
+			&creatorCreatedAt,
 			&commentString)
 		if err != nil {
 			return []dtopost.Post{}, 0, err
 		}
+
+		post.CreatedAt = createdAt.Format("2006-01-02 15:04:05.999")
+		creator.CreatedAt = creatorCreatedAt.Format("2006-01-02 15:04:05.999")
 
 		comments := make([]dtocomment.Comment, 0)
 		for i := 0; i < len(commentString); i++ {
@@ -114,7 +120,7 @@ func (pr *PostRepository) GetPostWithFilter(ctx context.Context, filter dtopost.
 			comment.Creator.Name = commentArray[3]
 			comment.Creator.ImageUrl = commentArray[4]
 			comment.Creator.FriendCount, _ = strconv.ParseInt(commentArray[5], 10, 64)
-			comment.CreatedAt = commentArray[6]
+			comment.Creator.CreatedAt = commentArray[6]
 
 			comments = append(comments, comment)
 		}

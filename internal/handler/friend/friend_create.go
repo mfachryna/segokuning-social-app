@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -48,6 +47,14 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validation.UuidValidation(friendId); err != nil {
+		(&response.Response{
+			HttpStatus: http.StatusNotFound,
+			Message:    err.Error(),
+		}).GenerateResponse(w)
+		return
+	}
+
 	_, err := uh.ur.FindById(ctx, friendId)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -64,15 +71,6 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 		}).GenerateResponse(w)
 		return
 	}
-
-	if err := validation.UuidValidation(friendId); err != nil {
-		(&response.Response{
-			HttpStatus: http.StatusBadRequest,
-			Message:    err.Error(),
-		}).GenerateResponse(w)
-		return
-	}
-
 	count, err := uh.fr.FindByRelation(ctx, userId, friendId)
 	if err != nil {
 		(&response.Response{
@@ -91,7 +89,6 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := uh.fr.Insert(ctx, userId, friendId); err != nil {
-		fmt.Println(err.Error())
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),

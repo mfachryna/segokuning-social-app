@@ -20,7 +20,6 @@ import (
 func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println(err)
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -31,7 +30,6 @@ func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 	// validate file Mime type
 	if err := validation.ValidateImageFileType(fileHeader); err != nil {
-		fmt.Println(err)
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -41,7 +39,6 @@ func (im *ImageHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 	// validate file size
 	if fileHeader.Size > (2 * 1024 * 1024) { // 2 MB
-		fmt.Println("file size exceeds the limit (2MB)")
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "file size exceeds the limit (2MB)",

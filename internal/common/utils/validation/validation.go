@@ -3,6 +3,8 @@ package validation
 import (
 	"fmt"
 	"mime/multipart"
+	"net/http"
+	neturl "net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -59,7 +61,6 @@ func fileFormatValidator(fl validator.FieldLevel) bool {
 	}
 
 	ext := strings.ToLower(file.Filename[strings.LastIndex(file.Filename, ".")+1:])
-	fmt.Println(ext)
 	return ext == "jpg" || ext == "jpeg"
 }
 
@@ -69,7 +70,6 @@ func imageMaxSizeValidator(fl validator.FieldLevel) bool {
 		return false
 	}
 	maxSize := int64(2) // 2MB
-	fmt.Println(file.Size, maxSize)
 	return file.Size <= maxSize
 }
 
@@ -83,15 +83,10 @@ func validateNoSpace(fl validator.FieldLevel) bool {
 }
 
 func UrlValidation(url string) error {
-	pattern := `^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$`
+	_, err := neturl.ParseRequestURI(url)
 
-	regex, err := regexp.Compile(pattern)
 	if err != nil {
-		return fmt.Errorf("failed to compile pattern %v", err)
-	}
-
-	if !regex.MatchString(url) {
-		return fmt.Errorf("url is not valid")
+		return err
 	}
 
 	return nil
@@ -139,7 +134,7 @@ func PhoneValidation(phone string) error {
 		return fmt.Errorf("phone is not valid")
 	}
 
-	if len(phone) < 7 || len(phone) > 13 {
+	if len(phone) < 7 || len(phone) > 14 {
 		return fmt.Errorf("phone is too short or long")
 	}
 
@@ -150,6 +145,20 @@ func ValidateImageFileType(fileHeader *multipart.FileHeader) error {
 	ext := strings.ToLower(fileHeader.Filename[strings.LastIndex(fileHeader.Filename, ".")+1:])
 	if !(ext == "jpg" || ext == "jpeg") {
 		return fmt.Errorf("file format must be JPG or JPEG")
+	}
+	return nil
+}
+
+func ValidateParams(r *http.Request, fields interface{}) error {
+
+	val := reflect.ValueOf(fields)
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i).Tag.Get("json")
+		if _, exist := r.Form[field]; exist {
+			if r.Form.Get(field) == "" {
+				return fmt.Errorf("%s field should have value if present", field)
+			}
+		}
 	}
 	return nil
 }
