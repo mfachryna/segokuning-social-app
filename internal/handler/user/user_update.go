@@ -24,6 +24,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}).GenerateResponse(w)
 		return
 	}
+
 	if err := validation.UrlValidation(data.ImageUrl); err != nil {
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
