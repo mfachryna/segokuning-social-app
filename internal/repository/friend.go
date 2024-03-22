@@ -5,15 +5,18 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 type FriendRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log *zap.Logger
 }
 
-func NewFriendRepo(db *pgxpool.Pool) *FriendRepository {
+func NewFriendRepo(db *pgxpool.Pool, log *zap.Logger) *FriendRepository {
 	return &FriendRepository{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 

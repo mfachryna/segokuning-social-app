@@ -8,15 +8,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/user"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
+	"go.uber.org/zap"
 )
 
 type UserRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log *zap.Logger
 }
 
-func NewUserRepo(db *pgxpool.Pool) *UserRepository {
+func NewUserRepo(db *pgxpool.Pool, log *zap.Logger) *UserRepository {
 	return &UserRepository{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 

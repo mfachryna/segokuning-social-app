@@ -6,15 +6,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
+	"go.uber.org/zap"
 )
 
 type CommentRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log *zap.Logger
 }
 
-func NewCommentRepo(db *pgxpool.Pool) *CommentRepository {
+func NewCommentRepo(db *pgxpool.Pool, log *zap.Logger) *CommentRepository {
 	return &CommentRepository{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 

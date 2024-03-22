@@ -42,10 +42,10 @@ func Run(cfg *config.Configuration) {
 
 	r := chi.NewRouter()
 
-	ur := repository.NewUserRepo(pgx)
-	fr := repository.NewFriendRepo(pgx)
-	cr := repository.NewCommentRepo(pgx)
-	pr := repository.NewPostRepo(pgx)
+	ur := repository.NewUserRepo(pgx, logger)
+	fr := repository.NewFriendRepo(pgx, logger)
+	cr := repository.NewCommentRepo(pgx, logger)
+	pr := repository.NewPostRepo(pgx, logger)
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.Route("/v1", func(r chi.Router) {

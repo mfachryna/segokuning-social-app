@@ -13,15 +13,18 @@ import (
 	dtocomment "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/comment"
 	dtopost "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/post"
 	"github.com/shafaalafghany/segokuning-social-app/internal/entity"
+	"go.uber.org/zap"
 )
 
 type PostRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log *zap.Logger
 }
 
-func NewPostRepo(db *pgxpool.Pool) *PostRepository {
+func NewPostRepo(db *pgxpool.Pool, log *zap.Logger) *PostRepository {
 	return &PostRepository{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
