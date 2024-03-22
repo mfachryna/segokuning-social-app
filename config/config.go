@@ -29,8 +29,9 @@ type PostgresConfig struct {
 }
 
 type AppConfig struct {
-	JwtSecret  string
-	BcryptSalt string
+	Environment string
+	JwtSecret   string
+	BcryptSalt  string
 }
 
 type S3Config struct {
@@ -40,6 +41,12 @@ type S3Config struct {
 }
 
 func NewConfig() *Configuration {
+	appConfig := &AppConfig{
+		Environment: os.Getenv("ENV"),
+		JwtSecret:   os.Getenv("JWT_SECRET"),
+		BcryptSalt:  os.Getenv("BCRYPT_SALT"),
+	}
+
 	additional := ""
 	if os.Getenv("ENV") != "production" {
 		additional = "&sslrootcert=ap-southeast-1-bundle.pem&Timezone=UTC"
@@ -61,10 +68,7 @@ func NewConfig() *Configuration {
 			PostgresqlSSLMode:  false,
 			PostgresAdd:        additional,
 		},
-		App: AppConfig{
-			JwtSecret:  os.Getenv("JWT_SECRET"),
-			BcryptSalt: os.Getenv("BCRYPT_SALT"),
-		},
+		App: *appConfig,
 		S3: S3Config{
 			ID:         os.Getenv("S3_ID"),
 			SecretKey:  os.Getenv("S3_SECRET_KEY"),
