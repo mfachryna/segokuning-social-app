@@ -9,6 +9,7 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/friend"
+	"go.uber.org/zap"
 )
 
 func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,9 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 		userId string
 		data   dto.FriendData
 	)
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		uh.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "required fields are missing or invalid",
@@ -27,6 +30,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
+			uh.log.Error(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -40,6 +44,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	friendId := data.UserId
 
 	if userId == friendId {
+		uh.log.Error("cannot add self as friend")
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "Cannot add self as friend",
@@ -48,6 +53,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.UuidValidation(friendId); err != nil {
+		uh.log.Error("failed to validate uuid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusNotFound,
 			Message:    err.Error(),
@@ -58,6 +64,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	_, err := uh.ur.FindById(ctx, friendId)
 	if err != nil {
 		if err == pgx.ErrNoRows {
+			uh.log.Error("user is not found", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusNotFound,
 				Message:    "User not found",
@@ -65,14 +72,17 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		uh.log.Error("failed to get user", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
 		}).GenerateResponse(w)
 		return
 	}
+
 	count, err := uh.fr.FindByRelation(ctx, userId, friendId)
 	if err != nil {
+		uh.log.Error("failed to get user relation", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -81,6 +91,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if count > 0 {
+		uh.log.Error("you already add this user as friend")
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    "You are already add this user as friend",
@@ -89,6 +100,7 @@ func (uh *FriendHandler) CreateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := uh.fr.Insert(ctx, userId, friendId); err != nil {
+		uh.log.Error("failed to add user", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
