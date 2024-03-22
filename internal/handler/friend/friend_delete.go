@@ -2,13 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/response"
 	"github.com/shafaalafghany/segokuning-social-app/internal/common/utils/validation"
 	dto "github.com/shafaalafghany/segokuning-social-app/internal/domain/dto/friend"
+	"go.uber.org/zap"
 )
 
 func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +17,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 		data   dto.FriendData
 	)
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		uh.log.Error("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "required fields are missing or invalid",
@@ -27,6 +28,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
+			uh.log.Error(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -40,6 +42,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 	friendId := data.UserId
 
 	if err := validation.UuidValidation(friendId); err != nil {
+		uh.log.Error("failed to validate uuid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -49,6 +52,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 
 	count, err := uh.fr.FindByRelation(ctx, userId, friendId)
 	if err != nil {
+		uh.log.Error("failed to get user relation", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -57,6 +61,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if count <= 0 {
+		uh.log.Error("you are not friend with this user")
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    "You are not friend with this user",
@@ -65,7 +70,7 @@ func (uh *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := uh.fr.Delete(ctx, userId, friendId); err != nil {
-		fmt.Println(err.Error())
+		uh.log.Error("failed to delete friend", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
