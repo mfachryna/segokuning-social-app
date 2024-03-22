@@ -119,8 +119,8 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		user.Email = data.CredentialValue
-		resData = dto.PhoneData{
-			Phone:       user.Email,
+		resData = dto.EmailData{
+			Email:       user.Email,
 			Name:        user.Name,
 			AccessToken: tokenString,
 		}

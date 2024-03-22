@@ -59,6 +59,13 @@ func (uh *UserHandler) LinkEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if resultEmail != nil {
+		if resultEmail.ID == userId && resultEmail.Email != "" {
+			(&response.Response{
+				HttpStatus: http.StatusBadRequest,
+				Message:    "You already have an email",
+			}).GenerateResponse(w)
+			return
+		}
 		(&response.Response{
 			HttpStatus: http.StatusConflict,
 			Message:    "email already existed",

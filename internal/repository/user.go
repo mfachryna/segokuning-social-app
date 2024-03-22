@@ -126,7 +126,7 @@ func (ur *UserRepository) Delete(ctx context.Context, userId string) error {
 }
 
 func (ur *UserRepository) Update(ctx context.Context, data entity.User) error {
-	sql := `UPDATE users SET name = $1, email = $2, phone = $3, password = $4, image_url = $5, friend_count = $6 WHERE id = $8`
+	sql := `UPDATE users SET name = $1, email = $2, phone = $3, password = $4, image_url = $5, friend_count = $6 WHERE id = $7`
 
 	_, err := ur.db.Exec(ctx, sql, data.Name, data.Email, data.Phone, data.Password, data.ImageUrl, data.FriendCount, data.ID)
 	if err != nil {

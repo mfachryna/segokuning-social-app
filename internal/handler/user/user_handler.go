@@ -33,7 +33,7 @@ func NewUserHandler(r chi.Router, ur interfaces.UserRepository, val *validator.V
 		r.Route("/link", func(r chi.Router) {
 			r.Use(jwt.JwtMiddleware)
 			r.Post("/phone", uh.LinkPhone)
-			r.Post("/email", uh.LinkEmail)
+			r.Post("/", uh.LinkEmail)
 		})
 	})
 }

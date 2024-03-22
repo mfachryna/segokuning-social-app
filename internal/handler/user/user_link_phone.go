@@ -59,6 +59,13 @@ func (uh *UserHandler) LinkPhone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if resultPhone != nil {
+		if resultPhone.ID == userId && resultPhone.Phone != "" {
+			(&response.Response{
+				HttpStatus: http.StatusBadRequest,
+				Message:    "You already have a phone number",
+			}).GenerateResponse(w)
+			return
+		}
 		(&response.Response{
 			HttpStatus: http.StatusConflict,
 			Message:    "phone number already existed",
