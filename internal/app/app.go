@@ -22,7 +22,6 @@ import (
 	"github.com/shafaalafghany/segokuning-social-app/internal/repository"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/db"
 	"github.com/shafaalafghany/segokuning-social-app/pkg/logger"
-	"github.com/shafaalafghany/segokuning-social-app/pkg/promotheus"
 )
 
 func Run(cfg *config.Configuration) {
@@ -49,7 +48,7 @@ func Run(cfg *config.Configuration) {
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.Route("/v1", func(r chi.Router) {
-		r.Use(promotheus.PrometheusMiddleware)
+		// r.Use(promotheus.PrometheusMiddleware)
 		userHandler.NewUserHandler(r, ur, validate, *cfg, logger)
 		friendHandler.NewFriendHandler(r, ur, fr, validate, *cfg, logger)
 		postHandler.NewPostHandler(r, ur, pr, validate, *cfg, logger)
