@@ -73,23 +73,25 @@ func (uh *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	count, err := uh.fr.FindByRelation(ctx, userId, post.UserId)
-	if err != nil {
-		uh.log.Info("failed to get user relation", zap.Error(err))
-		(&response.Response{
-			HttpStatus: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}).GenerateResponse(w)
-		return
-	}
+	if userId != post.UserId {
+		count, err := uh.fr.FindByRelation(ctx, userId, post.UserId)
+		if err != nil {
+			uh.log.Info("failed to get user relation", zap.Error(err))
+			(&response.Response{
+				HttpStatus: http.StatusInternalServerError,
+				Message:    err.Error(),
+			}).GenerateResponse(w)
+			return
+		}
 
-	if count <= 0 {
-		uh.log.Info("you cannot commented because you are not friend with this user")
-		(&response.Response{
-			HttpStatus: http.StatusBadRequest,
-			Message:    "You cannot commented because you are not friend with this user",
-		}).GenerateResponse(w)
-		return
+		if count <= 0 {
+			uh.log.Info("you cannot commented because you are not friend with this user")
+			(&response.Response{
+				HttpStatus: http.StatusBadRequest,
+				Message:    "You cannot commented because you are not friend with this user",
+			}).GenerateResponse(w)
+			return
+		}
 	}
 
 	commentEntity := entity.Comment{
