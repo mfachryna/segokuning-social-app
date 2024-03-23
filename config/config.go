@@ -41,9 +41,7 @@ type S3Config struct {
 }
 
 func NewConfig() *Configuration {
-	additional := ""
 	if os.Getenv("ENV") != "production" {
-		// additional = "&sslrootcert=ap-southeast-1-bundle.pem&Timezone=UTC"
 		if godotenv.Load() != nil {
 			fmt.Println("error loading .env file")
 		}
@@ -65,7 +63,7 @@ func NewConfig() *Configuration {
 			PostgresqlUser:     os.Getenv("DB_USERNAME"),
 			PostgresqlDbname:   os.Getenv("DB_NAME"),
 			PostgresqlPassword: os.Getenv("DB_PASSWORD"),
-			PostgresParams:     os.Getenv("DB_PARAMS") + additional,
+			PostgresParams:     os.Getenv("DB_PARAMS"),
 		},
 		App: *appConfig,
 		S3: S3Config{
