@@ -12,12 +12,13 @@ import (
 
 // Return new Postgresql db instance
 func NewPsqlDB(c *config.Configuration) *pgxpool.Pool {
-	dataSourceName := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
+	dataSourceName := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?",
+		c.Postgres.PostgresqlUser,
+		c.Postgres.PostgresqlPassword,
 		c.Postgres.PostgresqlHost,
 		c.Postgres.PostgresqlPort,
-		c.Postgres.PostgresqlUser,
 		c.Postgres.PostgresqlDbname,
-		c.Postgres.PostgresqlPassword,
+		c.Postgres.PostgresParams,
 	)
 
 	poolConf, err := pgxpool.ParseConfig(dataSourceName)
