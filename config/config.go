@@ -24,8 +24,7 @@ type PostgresConfig struct {
 	PostgresqlUser     string
 	PostgresqlPassword string
 	PostgresqlDbname   string
-	PostgresqlSSLMode  bool
-	PostgresAdd        string
+	PostgresParams     string
 }
 
 type AppConfig struct {
@@ -38,12 +37,13 @@ type S3Config struct {
 	ID         string
 	SecretKey  string
 	BucketName string
+	Region     string
 }
 
 func NewConfig() *Configuration {
 	additional := ""
 	if os.Getenv("ENV") != "production" {
-		additional = "&sslrootcert=ap-southeast-1-bundle.pem&Timezone=UTC"
+		// additional = "&sslrootcert=ap-southeast-1-bundle.pem&Timezone=UTC"
 		if godotenv.Load() != nil {
 			fmt.Println("error loading .env file")
 		}
@@ -65,14 +65,14 @@ func NewConfig() *Configuration {
 			PostgresqlUser:     os.Getenv("DB_USERNAME"),
 			PostgresqlDbname:   os.Getenv("DB_NAME"),
 			PostgresqlPassword: os.Getenv("DB_PASSWORD"),
-			PostgresqlSSLMode:  false,
-			PostgresAdd:        additional,
+			PostgresParams:     os.Getenv("DB_PARAMS") + additional,
 		},
 		App: *appConfig,
 		S3: S3Config{
 			ID:         os.Getenv("S3_ID"),
 			SecretKey:  os.Getenv("S3_SECRET_KEY"),
 			BucketName: os.Getenv("S3_BUCKET_NAME"),
+			Region:     os.Getenv("S3_REGION"),
 		},
 	}
 

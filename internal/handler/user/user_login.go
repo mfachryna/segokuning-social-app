@@ -22,7 +22,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		uh.log.Error("required fields are missing or invalid", zap.Error(err))
+		uh.log.Info("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "required fields are missing or invalid",
@@ -33,7 +33,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(data); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
-			uh.log.Error(validation.CustomError(e), zap.Error(err))
+			uh.log.Info(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -48,7 +48,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if credType == "phone" {
 		if err := validation.PhoneValidation(data.CredentialValue); err != nil {
-			uh.log.Error("failed to validate phone credential", zap.Error(err))
+			uh.log.Info("failed to validate phone credential", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    err.Error(),
@@ -61,7 +61,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		result, err := uh.ur.FindByPhone(ctx, user.Phone)
 		if err != nil {
 			if err == pgx.ErrNoRows {
-				uh.log.Error("phone is not found", zap.Error(err))
+				uh.log.Info("phone is not found", zap.Error(err))
 				(&response.Response{
 					HttpStatus: http.StatusNotFound,
 					Message:    "phone not found",
@@ -69,7 +69,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			uh.log.Error("failed to get phone", zap.Error(err))
+			uh.log.Info("failed to get phone", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusInternalServerError,
 				Message:    err.Error(),
@@ -80,7 +80,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		userData = *result
 	} else {
 		if err := validation.EmailValidation(data.CredentialValue); err != nil {
-			uh.log.Error("failed to validate email credential", zap.Error(err))
+			uh.log.Info("failed to validate email credential", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    err.Error(),
@@ -93,7 +93,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		result, err := uh.ur.FindByEmail(ctx, data.CredentialValue)
 		if err != nil {
 			if err == pgx.ErrNoRows {
-				uh.log.Error("email is not found", zap.Error(err))
+				uh.log.Info("email is not found", zap.Error(err))
 				(&response.Response{
 					HttpStatus: http.StatusNotFound,
 					Message:    "phone not found",
@@ -101,7 +101,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			uh.log.Error("failed to get email", zap.Error(err))
+			uh.log.Info("failed to get email", zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusInternalServerError,
 				Message:    err.Error(),
@@ -113,7 +113,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(data.Password)); err != nil {
-		uh.log.Error("failed to compare password", zap.Error(err))
+		uh.log.Info("failed to compare password", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    "password mismatched",
@@ -123,7 +123,7 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	tokenString, err := jwt.SignedToken(jwt.Claim{UserId: userData.ID})
 	if err != nil {
-		uh.log.Error("failed to sign token", zap.Error(err))
+		uh.log.Info("failed to sign token", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),

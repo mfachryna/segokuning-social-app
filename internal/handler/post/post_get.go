@@ -18,7 +18,7 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err := r.ParseForm(); err != nil {
-		uh.log.Error("failed to parse form", zap.Error(err))
+		uh.log.Info("failed to parse form", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -27,7 +27,7 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.ValidateParams(r, filter); err != nil {
-		uh.log.Error("failed to validate params", zap.Error(err))
+		uh.log.Info("failed to validate params", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -36,7 +36,7 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := schema.NewDecoder().Decode(&filter, r.Form); err != nil {
-		uh.log.Error("required fields are missing or invalid", zap.Error(err))
+		uh.log.Info("required fields are missing or invalid", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusBadRequest,
 			Message:    err.Error(),
@@ -47,7 +47,7 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	if err := uh.val.Struct(filter); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		for _, e := range validationErrors {
-			uh.log.Error(validation.CustomError(e), zap.Error(err))
+			uh.log.Info(validation.CustomError(e), zap.Error(err))
 			(&response.Response{
 				HttpStatus: http.StatusBadRequest,
 				Message:    validation.CustomError(e),
@@ -66,7 +66,7 @@ func (uh *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 
 	data, count, err := uh.pr.GetPostWithFilter(ctx, filter, userId)
 	if err != nil {
-		uh.log.Error("failed to get post with filter", zap.Error(err))
+		uh.log.Info("failed to get post with filter", zap.Error(err))
 		(&response.Response{
 			HttpStatus: http.StatusInternalServerError,
 			Message:    err.Error(),
